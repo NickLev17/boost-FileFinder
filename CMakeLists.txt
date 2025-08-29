@@ -22,7 +22,7 @@ if(Boost_FOUND)
 else()
     message(FATAL_ERROR "Boost not found")
 endif()
-install(TARGETS print_ip RUNTIME DESTINATION bin)
+install(TARGETS bayan RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
