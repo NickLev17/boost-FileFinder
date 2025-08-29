@@ -12,4 +12,4 @@
 ### --hs или --hashalgorithm - алгоритм хеширования данных, по умолчаию crc32.
 
 ## Пример использования утилиты:
-./bayan --d /path1,/path2 --exd /path1 --sf 5 --maskfile "*cmake*"  --bs 50  --ha crc45
+./bayan --d /path1,/path2 --exd /path1 --sf 5 --maskfile "\*cmake\*"  --bs 50  --ha crc45
