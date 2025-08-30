@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
 
     po::options_description desc("Options");
     desc.add_options()("help,h", "Show help")(
-        "direct,d", po::value<string>(&direct), "work directory")("exceptiondirect,exd", po::value<string>(&exceptionDirect), "exception directory")("levelscan,l", po::value<int>(&levelScan)->default_value(0), "level scaning")("sizefile,sf", po::value<size_t>(&sizeFile)->default_value(1), "size file")("maskfile,m", po::value<string>(&maskFile)->default_value("*"), "mask file")("blocksize,bs", po::value<size_t>(&blockSize), "size file")("hashalgorithm,ha", po::value<string>(&hAlgorithm)->default_value("crc32"), "hash algorithm");
+        "direct,d", po::value<string>(&direct), "work directory")("exceptiondirect,exd", po::value<string>(&exceptionDirect), "exception directory")("levelscan,l", po::value<int>(&levelScan)->default_value(0), "level scaning")("sizefile,sf", po::value<size_t>(&sizeFile)->default_value(1), "size file")("maskfile,m", po::value<string>(&maskFile)->default_value("*"), "mask file")("blocksize,bs", po::value<size_t>(&blockSize)->default_value(1), "size file")("hashalgorithm,ha", po::value<string>(&hAlgorithm)->default_value("crc32"), "hash algorithm");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
