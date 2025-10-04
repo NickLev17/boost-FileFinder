@@ -347,15 +347,15 @@ public:
         auto &vec_uint = boost::fusion::at_c<2>(collect);
 
         cout << "Path: " << p.first << ", file:  " << p.second << ", ";
-        cout << "size: " << std::dec << num << ", ";
-        cout << "Hash: [";
-        for (size_t i = 0; i < vec_uint.size(); ++i)
-        {
-            cout << std::hex << vec_uint[i];
-            if (i + 1 < vec_uint.size())
-                cout << ", ";
-        }
-        cout << "]" << endl;
+        cout << "size: " << std::dec << num << "\n";
+        //cout << "Hash: [";
+        //for (size_t i = 0; i < vec_uint.size(); ++i)
+      //  {
+         //   cout << std::hex << vec_uint[i];
+         //   if (i + 1 < vec_uint.size())
+           //     cout << ", ";
+       // }
+      //  cout << "]" << endl;
     }
 };
 
