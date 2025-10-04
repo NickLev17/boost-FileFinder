@@ -46,25 +46,25 @@ class FileFinder
 {
 public:
     string maska;
-    FileFinder(vector<string> &_path, vector<string> &_exceptPath, const string &maskFile)
+    int level;
+    vector<string> exceptDir;
+    FileFinder(vector<string> &_path, vector<string> &_exceptPath, const string &maskFile, const int &_levelScan)
     {
         maska = maskFile;
         workPath.clear();
         path_and_file.clear();
         sizeFiles.clear();
         workPath = _path;
-
-        if (!_exceptPath.empty())
+        level = _levelScan;
+        exceptDir = _exceptPath;
+        if (!exceptDir.empty())
         {
             workPath.erase(std::remove_if(workPath.begin(), workPath.end(),
                                           [&](const std::string &w)
                                           {
-                                              return std::find(_exceptPath.begin(), _exceptPath.end(), w) != _exceptPath.end();
+                                              return std::find(exceptDir.begin(), exceptDir.end(), w) != exceptDir.end();
                                           }),
                            workPath.end());
-
-            for (const auto &w : workPath)
-                std::cout << w << std::endl;
         }
     }
 
@@ -74,24 +74,69 @@ public:
         auto iter = workPath.begin();
         while (iter != workPath.end())
         {
-            for (const auto &entry : fs::directory_iterator(iter.base()->data()))
+
+            for (fs::recursive_directory_iterator it(*iter, fs::directory_options::skip_permission_denied), end_it; it != end_it; ++it)
+
             {
-
-                uintmax_t temp = getSizeFile(entry.path());
-
-                if (temp >= _sizeFile)
+                try
                 {
-                    if (matchMask(entry.path(), maska))
+
+                    if (!exceptDir.empty())
                     {
 
-                        sizeFiles.push_back(temp);
-                        path_and_file.push_back({iter.base()->data(), parsNameFile(entry.path())});
+                        if (isExceptionDir((*it).path().string()))
+                        {
+
+                            it.disable_recursion_pending();
+                            continue;
+                        }
+                    }
+
+                    if (it.depth() > level)
+                    {
+                        continue;
+                        it.disable_recursion_pending();
+                    }
+
+                    uintmax_t temp = getSizeFile((*it).path().string());
+                    if (temp >= _sizeFile)
+                    {
+
+                        if (matchMask((*it).path().string(), maska))
+                        {
+
+                            sizeFiles.push_back(temp);
+
+                            path_and_file.push_back({(*it).path().string(), parsNameFile((*it).path().string())});
+                        }
                     }
                 }
-            }
 
+                catch (const fs::filesystem_error &error)
+                {
+                }
+            }
             ++iter;
         }
+
+        if (path_and_file.empty())
+        {
+            cout << "Directory is not existed file\n";
+        }
+    }
+
+    bool isExceptionDir(const string &path)
+    {
+
+        for (const auto ex : exceptDir)
+        {
+            if (path == ex)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     uintmax_t getSizeFile(const string &file)
@@ -108,7 +153,6 @@ public:
             }
             else
             {
-                // std::cerr << "Файл не найден или не является обычным файлом\n";
             }
         }
         catch (const fs::filesystem_error &e)
@@ -148,7 +192,7 @@ public:
         std::ifstream file(str, std::ios::binary | std::ios::ate);
         if (!file)
         {
-            std::cerr << "ERROR open file\n";
+            std::cerr << "Error open file" << " name file: " << str << "\n";
             return;
         }
 
@@ -161,7 +205,7 @@ public:
 
         if (!file.read(buffer.data(), fileSize))
         {
-            std::cerr << "ERROR reading file\n";
+            std::cerr << "Error reading file\n";
             return;
         }
         file.close();
@@ -206,7 +250,8 @@ public:
 
         for (const auto &[k, m] : findFile.path_and_file)
         {
-            rider.readFile(k + "/" + m);
+            rider.readFile(k);
+
             collection col(std::make_pair(k, m), *iter, rider.hashData);
             vec.push_back(col);
             ++iter;
@@ -301,7 +346,7 @@ public:
         auto &num = boost::fusion::at_c<1>(collect);
         auto &vec_uint = boost::fusion::at_c<2>(collect);
 
-        cout << "Path: " << p.first << " file:  " << p.second << ", ";
+        cout << "Path: " << p.first << ", file:  " << p.second << ", ";
         cout << "size: " << std::dec << num << ", ";
         cout << "Hash: [";
         for (size_t i = 0; i < vec_uint.size(); ++i)
@@ -343,7 +388,7 @@ int main(int argc, char *argv[])
 
     auto exceptionPath = parsDirect(exceptionDirect);
 
-    FileFinder filefinder(path, exceptionPath, maskFile);
+    FileFinder filefinder(path, exceptionPath, maskFile, levelScan);
     filefinder.findFileInPath(sizeFile);
 
     Comparator compar(filefinder, blockSize);
